@@ -95,6 +95,8 @@ class MqttClientPrivate {
     QString m_hostname;
     int m_port {MQTT_PORT};
     QString m_clientId;
+    QString m_login;
+    QString m_password;
     MQTTAsync m_client;
     bool m_connected {false};
     QMap<QString, QList<MqttTopic*>> m_topics;
@@ -132,6 +134,12 @@ bool MqttClient::_connect()
         conn_opts.onFailure = on_connect_failure;
         conn_opts.context = static_cast<void*>(this);
 
+        if(!d->m_login.isEmpty() && !d->m_password.isEmpty())
+        {
+            conn_opts.username = d->m_login.toStdString().c_str();
+            conn_opts.password = d->m_password.toStdString().c_str();
+        }
+
         return MQTTASYNC_SUCCESS == MQTTAsync_connect(d->m_client, &conn_opts);
     }
 
@@ -168,6 +176,42 @@ void MqttClient::setHostname(const QString &newHostname)
     _connect();
     emit hostnameChanged();
 }
+
+
+QString MqttClient::login() const
+{
+    Q_D(const MqttClient);
+    return d->m_login;
+}
+
+void MqttClient::setLogin(const QString &newLogin)
+{
+    Q_D(MqttClient);
+
+    if (d->m_login == newLogin)
+        return;
+    d->m_login = newLogin;
+    _connect();
+    emit loginChanged();
+}
+
+QString MqttClient::password() const
+{
+    Q_D(const MqttClient);
+    return d->m_password;
+}
+
+void MqttClient::setPassword(const QString &newPassword)
+{
+    Q_D(MqttClient);
+
+    if (d->m_password == newPassword)
+        return;
+    d->m_password = newPassword;
+    _connect();
+    emit passwordChanged();
+}
+
 
 QString MqttClient::clientId() const
 {

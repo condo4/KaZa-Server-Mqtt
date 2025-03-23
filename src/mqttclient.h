@@ -12,6 +12,8 @@ class MqttClient : public QObject
     Q_OBJECT
     Q_PROPERTY(QString hostname READ hostname WRITE setHostname NOTIFY hostnameChanged FINAL)
     Q_PROPERTY(QString clientId READ clientId WRITE setClientId NOTIFY clientIdChanged FINAL)
+    Q_PROPERTY(QString login READ login WRITE setLogin NOTIFY loginChanged FINAL)
+    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged FINAL)
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged FINAL)
     Q_PROPERTY(bool debug READ debug WRITE setDebug NOTIFY debugChanged FINAL)
 
@@ -27,6 +29,12 @@ public:
 
     QString hostname() const;
     void setHostname(const QString &newHostname);
+
+    QString login() const;
+    void setLogin(const QString &newLogin);
+
+    QString password() const;
+    void setPassword(const QString &newPassword);
 
     QString clientId() const;
     void setClientId(const QString &newClientId);
@@ -48,6 +56,8 @@ public:
 
 signals:
     void hostnameChanged();
+    void loginChanged();
+    void passwordChanged();
     void clientIdChanged();
     void connectedChanged();
     void message(QString topic, QString payload);
