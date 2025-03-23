@@ -40,9 +40,8 @@ void on_connect_success(void* context, MQTTAsync_successData*)
 {
     MqttClient * const mq = static_cast<MqttClient*>(context);
     mq->setConnected(true);
-#ifdef DEBUG
-    qDebug() << "on_connect_success";
-#endif
+    if(mq->debug())
+        qDebug() << "on_connect_success";
 }
 
 void on_subscribe_failure(void* context, MQTTAsync_failureData*)
@@ -53,10 +52,10 @@ void on_subscribe_failure(void* context, MQTTAsync_failureData*)
 
 void on_subscribe_success(void* context, MQTTAsync_successData*)
 {
-#ifdef DEBUG
     MqttTopic * const topic = static_cast<MqttTopic*>(context);
-    qDebug() << "on_subscribe_success " << topic->topic();
-#endif
+
+    if(topic->server()->debug())
+        qDebug() << "on_subscribe_success " << topic->topic();
 }
 
 void on_unsubscribe_failure(void* context, MQTTAsync_failureData*)
@@ -104,9 +103,8 @@ bool MqttClient::_connect()
 
         const QString address  = QString("tcp://%1:%2").arg(d->m_hostname).arg(d->m_port);
 
-#ifdef DEBUG
-        qDebug() << "_connect MqttClient to " << address;
-#endif
+        if(m_debug)
+            qDebug() << "_connect MqttClient to " << address;
 
         MQTTAsync_create(&d->m_client, qPrintable(address), qPrintable(d->m_clientId), MQTTCLIENT_PERSISTENCE_NONE, nullptr);
         MQTTAsync_setCallbacks(d->m_client, this, connection_lost, message_arrived, delivery_complete);
@@ -202,13 +200,15 @@ void MqttClient::setConnected(bool newConnected)
     }
 }
 
-void MqttClient::reciveMessage(QString topic, QString payload)
+void MqttClient::reciveMessage(QString topictitle, QString payload)
 {
     Q_D(MqttClient);
-    emit message(topic, payload);
-    if(d->m_topics.contains(topic))
+    emit message(topictitle, payload);
+    if(m_debug)
+        qDebug() << "RX " << topictitle;
+    if(d->m_topics.contains(topictitle))
     {
-        for(MqttTopic *topic: std::as_const(d->m_topics[topic]))
+        for(MqttTopic *topic: std::as_const(d->m_topics[topictitle]))
         {
             topic->reciveMessage(payload);
         }
@@ -265,4 +265,17 @@ void MqttClient::registerTopic(MqttTopic *topic)
         }
         d->m_topics[topic->topic()].append(topic);
     }
+}
+
+bool MqttClient::debug() const
+{
+    return m_debug;
+}
+
+void MqttClient::setDebug(bool newDebug)
+{
+    if (m_debug == newDebug)
+        return;
+    m_debug = newDebug;
+    emit debugChanged();
 }

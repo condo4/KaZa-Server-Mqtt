@@ -13,6 +13,7 @@ class MqttClient : public QObject
     Q_PROPERTY(QString hostname READ hostname WRITE setHostname NOTIFY hostnameChanged FINAL)
     Q_PROPERTY(QString clientId READ clientId WRITE setClientId NOTIFY clientIdChanged FINAL)
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged FINAL)
+    Q_PROPERTY(bool debug READ debug WRITE setDebug NOTIFY debugChanged FINAL)
 
 
     Q_DECLARE_PRIVATE(MqttClient)
@@ -34,12 +35,15 @@ public:
     void setConnected(bool newConnected);
 
     // Paho interface
-    void reciveMessage(QString topic, QString payload);
+    void reciveMessage(QString topictitle, QString payload);
 
     // Topic interface
     void unregisterTopic(MqttTopic *topic);
     void registerTopic(MqttTopic *topic);
 
+
+    bool debug() const;
+    void setDebug(bool newDebug);
 
 signals:
     void hostnameChanged();
@@ -47,9 +51,12 @@ signals:
     void connectedChanged();
     void message(QString topic, QString payload);
 
+    void debugChanged();
+
 private:
 
     bool _connect();
+    bool m_debug;
 };
 
 #endif // MQTTCLIENT_H
