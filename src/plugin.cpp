@@ -6,6 +6,7 @@
 
 void MqttPlugin::registerTypes(const char *uri)
 {
+    // @uri org.kazoe.mqtt
     qmlRegisterType<MqttClient>(uri, 1, 0, "MqttClient");
     qmlRegisterType<MqttTopic>(uri, 1, 0, "MqttTopic");
 }

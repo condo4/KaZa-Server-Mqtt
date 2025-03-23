@@ -1,12 +1,11 @@
 #ifndef MQTTTOPIC_H
 #define MQTTTOPIC_H
 
-#include <QObject>
-#include <QVariant>
+#include <kazaobject.h>
 
 class MqttClient;
 
-class MqttTopic : public QObject
+class MqttTopic : public KaZaObject
 {
     Q_OBJECT
     Q_PROPERTY(MqttClient* server READ server WRITE setServer NOTIFY serverChanged FINAL)
@@ -15,7 +14,6 @@ class MqttTopic : public QObject
 
     MqttClient *m_server {nullptr};
     QString m_topic;
-    QVariant m_value;
 
 public:
     explicit MqttTopic(QObject *parent = nullptr);
@@ -29,13 +27,9 @@ public:
 
     void reciveMessage(const QString &payload);
 
-    QVariant value() const;
-    void setValue(const QVariant &newValue);
-
 signals:
     void serverChanged();
     void topicChanged();
-    void valueChanged();
 };
 
 #endif // MQTTTOPIC_H

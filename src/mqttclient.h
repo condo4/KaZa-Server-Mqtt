@@ -45,6 +45,7 @@ signals:
     void hostnameChanged();
     void clientIdChanged();
     void connectedChanged();
+    void message(QString topic, QString payload);
 
 private:
 

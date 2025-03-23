@@ -92,9 +92,7 @@ MqttClient::MqttClient(QObject *parent)
     : QObject(parent)
     , d_ptr(new MqttClientPrivate(this))
 {
-#ifdef DEBUG
-    qDebug() << "Create MqttClient";
-#endif
+    qDebug() << "MQTT integration loaded";
 }
 
 bool MqttClient::_connect()
@@ -207,6 +205,7 @@ void MqttClient::setConnected(bool newConnected)
 void MqttClient::reciveMessage(QString topic, QString payload)
 {
     Q_D(MqttClient);
+    emit message(topic, payload);
     if(d->m_topics.contains(topic))
     {
         for(MqttTopic *topic: std::as_const(d->m_topics[topic]))

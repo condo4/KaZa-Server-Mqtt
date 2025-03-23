@@ -4,7 +4,7 @@
 #include <QDebug>
 
 MqttTopic::MqttTopic(QObject *parent)
-    : QObject{parent}
+    : KaZaObject{parent}
 {
 #ifdef DEBUG
     qDebug() << "Create MqttTopic";
@@ -63,7 +63,7 @@ void MqttTopic::setTopic(const QString &newTopic)
 
 void MqttTopic::reciveMessage(const QString &payload)
 {
-    QVariant newvalue = m_value;
+    QVariant newvalue = value();
 
     if(payload.startsWith("{"))
     {
@@ -89,17 +89,4 @@ void MqttTopic::reciveMessage(const QString &payload)
         }
     }
     setValue(newvalue);
-}
-
-QVariant MqttTopic::value() const
-{
-    return m_value;
-}
-
-void MqttTopic::setValue(const QVariant &newValue)
-{
-    if (m_value == newValue)
-        return;
-    m_value = newValue;
-    emit valueChanged();
 }
