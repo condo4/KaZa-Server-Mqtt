@@ -47,7 +47,8 @@ void on_connect_success(void* context, MQTTAsync_successData*)
 void on_subscribe_failure(void* context, MQTTAsync_failureData*)
 {
     MqttTopic * const topic = static_cast<MqttTopic*>(context);
-    qDebug() << "on_subscribe_failure " << topic->topic();
+    if(topic->server()->debug())
+        qDebug() << "on_subscribe_failure " << topic->topic();
 }
 
 void on_subscribe_success(void* context, MQTTAsync_successData*)
@@ -61,13 +62,29 @@ void on_subscribe_success(void* context, MQTTAsync_successData*)
 void on_unsubscribe_failure(void* context, MQTTAsync_failureData*)
 {
     MqttTopic * const topic = static_cast<MqttTopic*>(context);
-    qDebug() << "on_unsubscribe_failure " << topic->topic();
+    if(topic->server()->debug())
+        qDebug() << "on_unsubscribe_failure " << topic->topic();
 }
 
 void on_unsubscribe_success(void* context, MQTTAsync_successData*)
 {
     MqttTopic * const topic = static_cast<MqttTopic*>(context);
-    qDebug() << "on_unsubscribe_success " << topic->topic();
+    if(topic->server()->debug())
+        qDebug() << "on_unsubscribe_success " << topic->topic();
+}
+
+void on_publish_failure(void* context, MQTTAsync_failureData*)
+{
+    MqttClient * const mq = static_cast<MqttClient*>(context);
+    if(mq->debug())
+        qDebug() << "on_publish_failure";
+}
+
+void on_publish_success(void* context, MQTTAsync_successData*)
+{
+    MqttClient * const mq = static_cast<MqttClient*>(context);
+    if(mq->debug())
+        qDebug() << "on_publish_success";
 }
 
 class MqttClientPrivate {
@@ -204,10 +221,12 @@ void MqttClient::reciveMessage(QString topictitle, QString payload)
 {
     Q_D(MqttClient);
     emit message(topictitle, payload);
-    if(m_debug)
-        qDebug() << "RX " << topictitle;
     if(d->m_topics.contains(topictitle))
     {
+        if(m_debug)
+        {
+            qDebug() << "RX " << topictitle;
+        }
         for(MqttTopic *topic: std::as_const(d->m_topics[topictitle]))
         {
             topic->reciveMessage(payload);
@@ -264,6 +283,29 @@ void MqttClient::registerTopic(MqttTopic *topic)
             }
         }
         d->m_topics[topic->topic()].append(topic);
+    }
+}
+
+void MqttClient::publish(const QString &topic, const QString &message, int qos, bool retain)
+{
+    Q_D(MqttClient);
+
+    MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
+    MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
+
+    opts.onSuccess = on_publish_success;
+    opts.onFailure = on_publish_failure;
+    opts.context = static_cast<void*>(this);
+
+    QByteArray latin1Msg {message.toLatin1()};
+    pubmsg.payload = static_cast<void*>(latin1Msg.data());
+    pubmsg.payloadlen = latin1Msg.size();
+    pubmsg.qos = qos;
+    pubmsg.retained = static_cast<char>(retain);
+
+    const int rc = MQTTAsync_sendMessage(d->m_client, qPrintable(topic), &pubmsg, &opts);
+    if (rc != MQTTASYNC_SUCCESS) {
+        qWarning() << "Failed to start sendMessage, return code" << rc;
     }
 }
 

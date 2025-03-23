@@ -41,6 +41,7 @@ public:
     void unregisterTopic(MqttTopic *topic);
     void registerTopic(MqttTopic *topic);
 
+    Q_INVOKABLE void publish(const QString &topic, const QString &message, int qos, bool retain);
 
     bool debug() const;
     void setDebug(bool newDebug);
