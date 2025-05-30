@@ -267,13 +267,15 @@ void MqttClient::reciveMessage(QString topictitle, QString payload)
     emit message(topictitle, payload);
     if(d->m_topics.contains(topictitle))
     {
-        if(m_debug)
-        {
-            qDebug() << "RX " << topictitle;
-        }
+        bool used = false;
         for(MqttTopic *topic: std::as_const(d->m_topics[topictitle]))
         {
+            used = true;
             topic->reciveMessage(payload);
+        }
+        if(m_debug)
+        {
+            qDebug() << "RX " << ((used)?("USED"):("UNUSED")) << topictitle;
         }
     }
 }

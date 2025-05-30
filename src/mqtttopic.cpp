@@ -68,7 +68,7 @@ void MqttTopic::reciveMessage(const QString &payload)
     if(payload.startsWith("{"))
     {
         QJsonDocument jsonResponse = QJsonDocument::fromJson(payload.toUtf8());
-        newvalue = jsonResponse["value"];
+        newvalue = jsonResponse["value"].toVariant();
     }
     else
     {
